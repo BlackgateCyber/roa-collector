@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='roa-collector',
-    version='0.1.0',
+    version='0.1.1',
     description='RPKI ROA data file collector',
     author='Mingwei Zhang, Cecilia Testart',
     author_email='mingwei@caida.org',
