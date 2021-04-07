@@ -1,6 +1,7 @@
 import argparse
 import logging
 import urllib.request
+import urllib.error
 from bs4 import BeautifulSoup as bs, SoupStrainer
 import requests
 import gzip
@@ -34,22 +35,26 @@ class RoaCollector(object):
         ta_id = url.split("/")[-5].split(".")[0]
         trust_anchor = self.TRUST_ANCHORS[ta_id]
         roas = []
-        for line in urllib.request.urlopen(url):
-            line = line.decode().rstrip()
-            uri, asn, pfx, maxlen, notbefore, notafter = line.split(',')
-            if "/" not in uri:
-                # skip comment/header line
-                continue
-            if len(maxlen) == 0:
-                maxlen = pfx.split('/')[1]
-            roas.append(
-                {
-                    "asn": asn,
-                    "prefix": pfx,
-                    "maxLength": int(maxlen),
-                    "ta": trust_anchor
-                }
-            )
+        try:
+            for line in urllib.request.urlopen(url):
+                line = line.decode().rstrip()
+                uri, asn, pfx, maxlen, notbefore, notafter = line.split(',')
+                if "/" not in uri:
+                    # skip comment/header line
+                    continue
+                if len(maxlen) == 0:
+                    maxlen = pfx.split('/')[1]
+                roas.append(
+                    {
+                        "asn": asn,
+                        "prefix": pfx,
+                        "maxLength": int(maxlen),
+                        "ta": trust_anchor
+                    }
+                )
+        except urllib.error.HTTPError:
+            logging.debug(f"missing roas.csv file for {url}")
+
         return roas
 
     def _scan_ftp_site(self, only_year=None, only_month=None):
@@ -111,7 +116,6 @@ class RoaCollector(object):
 
         dir_path = f"{self.datadir}/{year}/{month}/{day}"
         file_path = f"{dir_path}/roas.daily.{utc_ts}.json.gz"
-        Path(dir_path).mkdir(parents=True, exist_ok=True)
         if Path(file_path).exists():
             logging.info("day file exists, skip downloading")
             return
@@ -121,8 +125,13 @@ class RoaCollector(object):
         roas = []
         for url in urls:
             roas.extend(self._download_csv_to_json(url))
+        if not roas:
+            # if we have not found any valid roas from raos.csv, exit
+            logging.info(f"no roas found for {datestr}")
+            return
         res = {"roas": roas}
 
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
         with gzip.open(file_path, "w") as outfile:
             outfile.write((json.dumps(res) + "\n").encode('utf-8'))
 
