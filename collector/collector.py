@@ -21,6 +21,11 @@ class RoaCollector(object):
     TRUST_ANCHORS = {
         "arin": "ARIN",
         "apnic": "APNIC RPKI Root",
+        "apnic-iana": "APNIC RPKI Root",
+        "apnic-arin": "APNIC RPKI Root",
+        "apnic-ripe": "APNIC RPKI Root",
+        "apnic-lacnic": "APNIC RPKI Root",
+        "apnic-afrinic": "APNIC RPKI Root",
         "lacnic": "LACNIC RPKI Root",
         "afrinic": "AfriNIC RPKI Root",
         "ripencc": "RIPE NCC RPKI Root",
