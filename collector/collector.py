@@ -58,7 +58,7 @@ class RoaCollector(object):
                     }
                 )
         except urllib.error.HTTPError:
-            logging.debug(f"missing roas.csv file for {url}")
+            logging.debug("missing roas.csv file for {}".format(url))
 
         return roas
 
@@ -71,7 +71,7 @@ class RoaCollector(object):
         site_base_url = "https://ftp.ripe.net/rpki/"
 
         def get_links(url, base=None):
-            logging.info(f"getting links for {url}")
+            logging.info("getting links for {}".format(url))
             get_base = requests.get(url, timeout=60)
             links = []
             for link in bs(get_base.content, 'html.parser', parse_only=SoupStrainer('a')):
@@ -117,22 +117,22 @@ class RoaCollector(object):
 
     def _download_and_merge(self, datestr, urls):
         year, month, day = datestr.split("-")
-        utc_ts = int(datetime.datetime.fromisoformat(f"{year}-{month}-{day}T00:00:00+00:00").timestamp())
+        utc_ts = int(datetime.datetime.fromisoformat("{}-{}-{}T00:00:00+00:00".format(year, month, day)).timestamp())
 
-        dir_path = f"{self.datadir}/{year}/{month}/{day}"
-        file_path = f"{dir_path}/roas.daily.{utc_ts}.json.gz"
+        dir_path = "{}/{}/{}/{}".format(self.datadir, year, month, day)
+        file_path = "{}/roas.daily.{}.json.gz".format(dir_path, utc_ts)
         if Path(file_path).exists():
             logging.info("day file exists, skip downloading")
             return
 
-        logging.info(f"downloading {len(urls)} files for {datestr} and merging into gzipped json file")
+        logging.info("downloading {} files for {} and merging into gzipped json file".format(len(urls), datestr))
         # download csvs
         roas = []
         for url in urls:
             roas.extend(self._download_csv_to_json(url))
         if not roas:
             # if we have not found any valid roas from raos.csv, exit
-            logging.info(f"no roas found for {datestr}")
+            logging.info("no roas found for {}".format(datestr))
             return
         res = {"roas": roas}
 
@@ -145,12 +145,12 @@ class RoaCollector(object):
         dt = datetime.datetime.utcfromtimestamp(now_ts)
 
         year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
-        dir_path = f"{self.datadir}/{year}/{month:02}/{day:02}/{hour:02}"
-        file_path = f"{dir_path}/roas.5min.{now_ts}.json.gz"
+        dir_path = "{}/{}/{:02}/{:02}/{:02}".format(self.datadir, year, month, day, hour)
+        file_path = "{}/roas.5min.{}.json.gz".format(dir_path, now_ts)
         if Path(file_path).exists():
-            logging.info(f"file {file_path} exists, skip downloading")
+            logging.info("file {} exists, skip downloading".format(file_path))
             return
-        logging.info(f"downloading new validated roas from RIPE to {file_path}...")
+        logging.info("downloading new validated roas from RIPE to {}...".format(file_path))
         Path(dir_path).mkdir(parents=True, exist_ok=True)
 
         r = requests.get("https://rpki-validator.ripe.net/api/export.json")
@@ -158,7 +158,7 @@ class RoaCollector(object):
 
         with gzip.open(file_path, "w") as outfile:
             outfile.write(r.content)
-        logging.info(f"download successful")
+        logging.info("download successful")
 
     def download_historical(self, only_year=None, only_month=None):
         links = self._scan_ftp_site(only_year=only_year, only_month=only_month)
