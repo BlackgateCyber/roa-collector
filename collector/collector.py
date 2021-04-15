@@ -169,7 +169,7 @@ class RoaCollector(object):
 
 def main():
     parser = argparse.ArgumentParser(description="RIPE Validated ROAs Collector")
-    subparsers = parser.add_subparsers(help='commands', dest='command', required=True)
+    subparsers = parser.add_subparsers(help='commands', dest='command')
 
     parser.add_argument("-d", "--dir", required=True, help="location to store the downloaded ROAs")
 
