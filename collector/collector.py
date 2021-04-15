@@ -176,6 +176,9 @@ def main():
     subparsers.add_parser("now", help="collect current validated ROAs")
 
     hist_parser = subparsers.add_parser("hist", help="collect historical validated ROAs")
+
+    hist_parser.add_argument("-c", "--current-month", action="store_true", default=False,
+                             help="download current month's hisotrical data")
     hist_parser.add_argument("-y", "--year", help="only download ROAs for the given year")
     hist_parser.add_argument("-m", "--month", help="only download ROAs for the given month")
 
@@ -188,7 +191,15 @@ def main():
     if opts.command == "now":
         collector.download_current_json()
     elif opts.command == "hist":
-        collector.download_historical(only_year=opts.year, only_month=opts.month)
+        if opts.current_month:
+            now = datetime.datetime.utcnow()
+            year = now.year
+            month = now.month
+        else:
+            year = opts.year
+            month = opts.month
+        logging.info("downloading historical data for year={}, month={}".format(year, month))
+        collector.download_historical(only_year=year, only_month=month)
 
 
 if __name__ == '__main__':
