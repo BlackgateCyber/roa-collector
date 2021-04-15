@@ -13,6 +13,7 @@ setuptools.setup(
         "beautifulsoup4",
         "argparse",
         "requests",
+        "backports-datetime-fromisoformat",  # for python version before 3.7
     ],
     entry_points={'console_scripts': [
         "roa-collector = collector.collector:main",

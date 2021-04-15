@@ -11,6 +11,7 @@ import datetime
 
 
 class RoaCollector(object):
+
     # TODO: discuss whether to include "apnic-xxxx" tals
 
     # CT's code: TRUST_ANCHORS = ['arin', 'apnic', 'apnic-iana', 'apnic-ripe', 'apnic-arin', 'apnic-lacnic', 'apnic-afrinic', 'lacnic', 'afrinic', 'ripencc']
@@ -33,7 +34,13 @@ class RoaCollector(object):
 
     def __init__(self, datadir="./"):
         self.datadir = datadir
-        pass
+        import sys
+
+        version = sys.version_info
+        assert version.major==3
+        from backports.datetime_fromisoformat import MonkeyPatch
+        if version.minor<7:
+            MonkeyPatch.patch_fromisoformat()
 
     def _download_csv_to_json(self, url):
         # https://ftp.ripe.net/rpki/ripencc.tal/2021/04/06/roas.csv
