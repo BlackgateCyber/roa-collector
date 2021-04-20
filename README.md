@@ -49,3 +49,14 @@ The historical data and real-time data share the same JSON format:
   ]
 }
 ```
+
+## Crontab Config
+
+The following cronjobs runs roa-collector per 5-min for 5min-bin data and every 6 hours for daily data:
+```
+# downloading real-time ROAs
+*/5 * * * * /usr/local/bin/roa-collector -d /data/rpki/roas now
+
+# download historical ROAs
+0 */6 * * * /usr/local/bin/roa-collector -d /data/rpki/roas hist --current-month
+```
