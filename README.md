@@ -60,3 +60,25 @@ The following cronjobs runs roa-collector per 5-min for 5min-bin data and every 
 # download historical ROAs
 0 */6 * * * /usr/local/bin/roa-collector -d /data/rpki/roas hist --current-month
 ```
+
+## Docker setup
+
+### Build container
+
+Checkout the repository and run the following command to build the image:
+```sh
+docker build -f Dockerfile -t roa-collector .
+```
+
+### Run container
+
+We first need a data direcotry to store downloaded ROA data.
+
+Assuming we have an directory ~data~ created for this purpose, then we can run the following command to download the most recent ROAs:
+
+``` sh
+docker run --rm -it -v $PWD/data:/data roa-collector roa-collector -d /data now
+```
+
+Note that this command mounts the current directory's ~data~ directory to ~/data~ in the container,
+and then specify that directory when running the ~roa-collector~ command. The usage of the command is the same as described above.
